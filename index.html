@@ -4,16 +4,37 @@
 	<title>Monsters!</title>
 
 	<style type="text/css">
+		:root {
+			--white: #fff;
+			--lightRed: rgba(242, 221, 219, 0.8);
+			--lightGreen: rgba(237, 242, 219, 0.8);
+			--green: #809c13;
+			--yellow: #FFEEAC;
+			--grey: #efefef;
+			--darkGrey: #a7a7a7;
+			--black: #000;
+			--lightBlack: rgba(0,0,0,0.2);
+			--midBlack: rgba(0,0,0,0.8);
+			--blue: #6495ED;
+		}
+
 		body {
-			display: grid;
-			gap: 20px;
 			margin: 1em auto;
 			max-width: 40em;
 			width: 88%;
 		}
 
-		h1 {
+		ul {
+			list-style: none;
+		}
+
+		.title, .subtitle {
 			text-align: center;
+		}
+
+		.subtitle {
+			font-size: 14px;
+			color: var(--darkGrey);
 		}
 
 		/**
@@ -28,34 +49,18 @@
 			padding: 1em;
 		}
 
-		.button {
-			justify-self: center;
-			width: 200px;
-			padding: 10px;
-			cursor: pointer;
-			color: #fff;
-			background-color: #FF4949;
-			border: none;
-			box-shadow: 1px 2px 0 1px #efefef;
-			transition: box-shadow .2s ease-out;
-		}
-
-		.button:hover {
-			box-shadow: 5px 6px 0px 1px #efefef;
-		}
-
-		p {
+		.text-muted {
 			font-size: 12px;
 			color: rgb(167, 167, 167);
 		}
 
-		a {
+		.text-muted a {
 			color: inherit;
 			text-decoration: none;
 		}
 
-		a:hover {
-			color: #FF4949;
+		.text-muted a:hover {
+			color: var(--blue);
 		}
 
 		/**
@@ -66,10 +71,7 @@
 			max-width: 100%;
 		}
 
-		ul {
-			list-style: none;
-		}
-
+		/* Flipping card styles*/
 		.card {
 			position: relative;
 			width: 150px;
@@ -83,7 +85,7 @@
 			left: 0%;
 			width: 100%;
 			height: 100%;
-			box-shadow: 0 0 15px rgba(0,0,0,0.1);
+			box-shadow: 0 0 15px var(--lightBlack);
 			transition: transform 1s;
   			transform-style: preserve-3d;
 		}
@@ -114,17 +116,82 @@
 			transform: rotateY( 180deg );
  			transition: transform 0.5s;
 		}
+
+		/* Modal styles */
+		.modal {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			z-index: 1;
+			background-color: var(--midBlack);
+		}
+
+		.modal--win {
+			background-color: var(--lightGreen);
+		}
+
+		.modal--lost {
+			background-color: var(--lightRed);
+		}
+		.modal__content {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-direction: column;
+			gap: 10px;
+			width: 380px;
+			height: 230px;
+			border-radius: 10px;
+			background-color: var(--grey);
+			box-shadow: 1px 2px 0 1px var(--lightBlack);
+		}
+
+		.modal__title,
+		.modal__text {
+			margin: 0;
+		}
+
+		.modal__text {
+			color: var(--midBlack);
+		}
+
+		.modal__button {
+			--shadow: 1px 2px 0 1px var(--grey);
+			justify-self: center;
+			padding: 10px 16px;
+			border: none;
+			border-radius: 5px;
+			margin-top: 30px;
+			box-shadow: var(--shadow);
+			transition: box-shadow .2s ease-out;
+			font-size: 12px;
+			cursor: pointer;
+			color: var(--white);
+			background-color: var(--lightBlack);
+			transition: background-color .2s ease;
+		}
+
+		.modal__button:hover,
+		.modal__button:focus {
+			background-color: var(--green);
+		}
+
+		.modal__button:focus {
+			box-shadow: 0 0 3px var(--darkGrey);
+		}
 	</style>
 </head>
 <body>
+	<h1 class="title">Monsters!</h1>
+	<p class="subtitle">Click a door to reveal a monster. Try not to find the sock.</p>
 
-	<h1>Monsters!</h1>
-
-	<div id="app">
-	</div>
-	<button class="button">Shuffle</button>
-
-	<footer>
+	<div id="app"></div>
+	<footer class='footer'>
 		<hr>
 		<p class="text-small text-muted">Icons by <a href="https://thenounproject.com/term/door/311732/">Jamie Dickinson</a>, <a href="https://thenounproject.com/term/monster/184225/">Nicky Knicky</a>, <a href="https://thenounproject.com/term/monster/1510400/">Alvaro Cabrera</a>, <a href="https://thenounproject.com/term/monster/28460/">Eliricon</a>, <a href="https://thenounproject.com/term/monster/82823/">April Yang</a>, <a href="https://thenounproject.com/term/monster/1062009/">tk66</a>, <a href="https://thenounproject.com/term/monster/24990/">Alex WaZa</a>, <a href="https://thenounproject.com/term/monster/37212/">Husein Aziz</a>, <a href="https://thenounproject.com/term/monster/2236082">iconcheese</a>, and <a href="https://thenounproject.com/term/socks/38451/">Yazmin Alanis</a>.</p>
 	</footer>
@@ -145,12 +212,14 @@
 			'sock'
 		];
 
+		const body = document.querySelector('body');
 		const app = document.querySelector('#app');
 		const button = document.querySelector('.button');
 		const monstersCopy = monsters.slice();
 		let monstersMarkup = '';
 		let shuffledMonsters = [];
 		let foundMonsters = [];
+		let modalOpen = false;
 
 		/**
 		 * Randomly shuffle an array
@@ -177,6 +246,18 @@
 			return array;
 		};
 
+		/**
+		confine the user’s focus to the modal window until it is dismissed:
+		*/
+		const focusRestrict = (modalOpen, modal) => {
+			document.addEventListener('focus', ( event ) => {
+				if ( modalOpen && !modal.contains( event.target ) ) {
+				event.stopPropagation();
+				modal.focus();
+				}
+			}, true);
+		}
+
 		const createMonstersMarkup = (monstersArray) => {
 			let monstersMarkup = monstersArray.map((monster, index) => {
 				return `
@@ -185,9 +266,7 @@
 								<div class="front" aria-hidden="false">
 									<img class="image" src="./assets/images/door.svg" alt="door">
 								</div>
-								<div class="back" aria-hidden="true">
-									<img class="image" src="./assets/images/${monster}.svg" alt=${monster}>
-								</div>
+								<div class="back" aria-hidden="true"></div>
 							</a>
 						</li>
 				`
@@ -195,6 +274,38 @@
 			
 			return monstersMarkup;
 		};
+
+		const handleModal = (gameStatus, step) => {
+			app.innerHTML += `
+			<div role='dialog' aria-labelledby='title' class='modal ${step ? 'modal--lost' : 'modal--win'}'>
+				<div class='modal__content'>
+					<h2 class='modal__title' id='title'>You ${gameStatus}</h2>
+					${ 
+						step 
+						? 
+						`<p class='modal__text'>You found ${step-1} monster${step === 1 ? '' : 's'}. Try to find 11!</p>`
+						:
+						`<p class='modal__text'>you found all the monters</p>`
+					}					
+					<button type='button' aria-label="new game" class="modal__button">New game</button>
+				</div>
+			</div>
+			`;
+
+			const modal = document.querySelector('.modal__content');
+			const button = document.querySelector('.modal__button');
+			button.addEventListener('click', init);
+
+			// screen readers support - focuses modal after it opens
+			// and keep tab button inside modal until new game starts
+			modalOpen = true;
+			modal.setAttribute('tabindex', '0');
+			modal.focus();
+			focusRestrict(handleModal, modal);
+
+			// omit content scrolling when modal window is open
+			body.style.overflow = 'hidden';
+		}
 
 		const handleMonstersReveal = (e) => {
 			const card = e.target.closest('.card');
@@ -209,6 +320,7 @@
 
 				foundMonsters.push(shuffledMonsters[currentMonsterId]);
 				cardContent.classList.add('rotate');
+				cardSides[1].innerHTML = `<img class="image" src="./assets/images/${shuffledMonsters[currentMonsterId]}.svg" alt=${shuffledMonsters[currentMonsterId]}>`;
 
 				// screen reader support
 				cardSides.forEach((item, index) => {
@@ -221,17 +333,15 @@
 
 				if (foundMonsters.length <= 11) {
 					if (foundMonsters.indexOf('sock') > -1) {
-						alert('You lost');
-						init();
+						handleModal('lost 🥺', foundMonsters.length)
 					}					
 				} else {
-					alert('Yon won!');
-					init();
+					handleModal('win 😊');
 				}
 			}
 		}
 
-		const render = (monstersMarkup) => {
+		const renderMonsters = (monstersMarkup) => {
 			app.innerHTML = `
 				<div class="row">
 					<ul class="grid">
@@ -242,17 +352,15 @@
 		}; 
 
 		const init = () => {
-			monstersMarkup = '';
-			shuffledMonsters = [];
+			body.style.overflow = 'scroll';
+			modalOpen = false;
 			foundMonsters = [];
-
 			shuffledMonsters = shuffle(monstersCopy);
 			monstersMarkup = createMonstersMarkup(shuffledMonsters);
 			
-			render(monstersMarkup);
+			renderMonsters(monstersMarkup);
 
-			button.addEventListener('click', init);
-			document.addEventListener('click', handleMonstersReveal);
+			document.addEventListener('click', handleMonstersReveal, false);
 		}
 
 		init();
