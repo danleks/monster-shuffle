@@ -261,37 +261,6 @@
 		let shuffledMonsters = [];
 		let foundMonsters = [];
 
-		window.addEventListener('click', (e) => {
-			const card = e.target.closest('.card');
-			const content = e.target.closest('.card').children[0];
-			const contentItems = Array.from(e.target.closest('.card').children[0].children);
-
-			if (card) {
-				let currentMonster = e.target.closest('.card').dataset.monster;
-				foundMonsters.push(currentMonster);
-				content.classList.add('rotate');
-
-				// screen reader support
-				contentItems.forEach((item, index) => {
-					if (index === 0) {
-						item.attributes["aria-hidden"].nodeValue = true;
-					} else {
-						item.attributes["aria-hidden"].nodeValue = false;
-					}
-				})
-
-				if (foundMonsters.length <= 11) {
-					if (foundMonsters.indexOf('sock') > -1) {
-						alert('You lost');
-						init();
-					}					
-				} else {
-					alert('Yon won!');
-					init();
-				}
-			}
-		})
-
 		/**
 		 * Randomly shuffle an array
 		 * https://stackoverflow.com/a/2450976/1293256
@@ -318,9 +287,9 @@
 		};
 
 		const createMonstersMarkup = (monstersArray) => {
-			let monstersMarkup = monstersArray.map(monster => {
+			let monstersMarkup = monstersArray.map((monster, index) => {
 				return `
-						<li class="card" data-monster=${monster}>
+						<li class="card" data-monster-id=${index}>
 							<a aria-live="polite" class="content" role="button" href="#">
 								<div class="front" aria-hidden="false">
 									<img class="image" src="./assets/images/door.svg" alt="door">
@@ -336,6 +305,41 @@
 			return monstersMarkup;
 		};
 
+		const handleMonstersReveal = (e) => {
+			const card = e.target.closest('.card');
+			if (!card) return;
+
+			if (card) {
+				const cardContent = e.target.closest('.card').children[0];
+				const cardSides = Array.from(e.target.closest('.card').children[0].children);
+
+				let sockIndex = shuffledMonsters.indexOf('sock')
+				let currentMonsterId = +card.getAttribute('data-monster-id');
+
+				foundMonsters.push(shuffledMonsters[currentMonsterId]);
+				cardContent.classList.add('rotate');
+
+				// screen reader support
+				cardSides.forEach((item, index) => {
+					if (index === 0) {
+						item.attributes["aria-hidden"].nodeValue = true;
+					} else {
+						item.attributes["aria-hidden"].nodeValue = false;
+					}
+				})
+
+				if (foundMonsters.length <= 11) {
+					if (foundMonsters.indexOf('sock') > -1) {
+						alert('You lost');
+						init();
+					}					
+				} else {
+					alert('Yon won!');
+					init();
+				}
+			}
+		}
+
 		const render = (monstersMarkup) => {
 			app.innerHTML = `
 				<div class="row">
@@ -344,23 +348,20 @@
 					</ul>
 				</div>
 			`;
-		};
+		}; 
 
 		const init = () => {
 			monstersMarkup = '';
 			shuffledMonsters = [];
 			foundMonsters = [];
 
-			button.addEventListener('click', init);
-
 			shuffledMonsters = shuffle(monstersCopy);
-
-			if (shuffledMonsters.length === 0) {
-				monstersMarkup = createMonstersMarkup(monsters);
-			} else {
-				monstersMarkup = createMonstersMarkup(shuffledMonsters);
-			}
+			monstersMarkup = createMonstersMarkup(shuffledMonsters);
+			
 			render(monstersMarkup);
+
+			button.addEventListener('click', init);
+			document.addEventListener('click', handleMonstersReveal);
 		}
 
 		init();
