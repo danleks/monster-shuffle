@@ -317,8 +317,11 @@
 
 				let sockIndex = shuffledMonsters.indexOf('sock')
 				let currentMonsterId = +card.getAttribute('data-monster-id');
+				
+				if (foundMonsters.indexOf(shuffledMonsters[currentMonsterId]) > -1) return;
 
 				foundMonsters.push(shuffledMonsters[currentMonsterId]);
+
 				cardContent.classList.add('rotate');
 				cardSides[1].innerHTML = `<img class="image" src="./assets/images/${shuffledMonsters[currentMonsterId]}.svg" alt=${shuffledMonsters[currentMonsterId]}>`;
 
