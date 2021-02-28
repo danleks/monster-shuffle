@@ -275,7 +275,7 @@
 			return monstersMarkup;
 		};
 
-		const handleModal = (gameStatus, step) => {
+		const handleModal = (e, gameStatus, step) => {
 			app.innerHTML += `
 			<div role='dialog' aria-labelledby='title' class='modal ${step ? 'modal--lost' : 'modal--win'}'>
 				<div class='modal__content'>
@@ -287,17 +287,18 @@
 						:
 						`<p class='modal__text'>you found all the monters</p>`
 					}					
-					<button type='button' aria-label="new game" class="modal__button">New game</button>
+					<button type='button' aria-label="new game" class="modal__button" data-new-game>New game</button>
 				</div>
 			</div>
 			`;
 
-			const modal = document.querySelector('.modal__content');
-			const button = document.querySelector('.modal__button');
-			button.addEventListener('click', init);
+			if (e.target.hasAttribute('data-new-game')) {
+				init();
+			}
 
 			// screen readers support - focuses modal after it opens
 			// and keep tab button inside modal until new game starts
+			const modal = document.querySelector('.modal__content');
 			modalOpen = true;
 			modal.setAttribute('tabindex', '0');
 			modal.focus();
@@ -309,7 +310,8 @@
 
 		const handleMonstersReveal = (e) => {
 			const card = e.target.closest('.card');
-			if (!card) return;
+			const modalIsOpen = e.target.closest('.modal__content');
+			if (!card && !modalIsOpen) return;
 
 			if (card) {
 				const cardContent = e.target.closest('.card').children[0];
@@ -333,14 +335,14 @@
 						item.attributes["aria-hidden"].nodeValue = false;
 					}
 				})
+			}
 
-				if (foundMonsters.length <= 11) {
+			if (foundMonsters.length <= 11) {
 					if (foundMonsters.indexOf('sock') > -1) {
-						handleModal('lost 🥺', foundMonsters.length)
+						handleModal(e, 'lost 🥺', foundMonsters.length)
 					}					
 				} else {
-					handleModal('win 😊');
-				}
+					handleModal(e, 'win 😊');
 			}
 		}
 
